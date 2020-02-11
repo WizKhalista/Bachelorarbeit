@@ -27,7 +27,7 @@ sess=tensorflow.Session()
 set_session(sess)
 
 global model
-model = load_model('vgg_newset.h5')
+model = load_model('Trained Models/vgg_newset.h5')
 #plot_model(model, to_file='InceptionCNN.png',show_layer_names=True,show_shapes=True)
 model.summary()
 #Define the graph
@@ -42,7 +42,7 @@ controller.set_policy(controller.POLICY_IMAGES)
 def evaluate_generator():
     print('evaluating')
     test_datagen = ImageDataGenerator(brightness_range=(0.2, 1.4))
-    test_gen = test_datagen.flow_from_directory('E:/BA/Datensatz/test', save_to_dir='E:/BA/Datensatz/test_generated', target_size=(240, 300), class_mode='categorical', batch_size=1)
+    test_gen = test_datagen.flow_from_directory('E:/Datensatz/test',target_size=(240, 300), class_mode='categorical', batch_size=1)
     evaluated = model.evaluate(test_gen)
     print(model.metrics_names)
     print('ergebnis:',evaluated)
@@ -50,21 +50,21 @@ def evaluate_generator():
 def create_confusion_matrix():
     print('creating confusion matrix')
     test_datagen = ImageDataGenerator(brightness_range=(0.2, 1.4))
-    test_gen = test_datagen.flow_from_directory('E:/BA/Datensatz/test', save_to_dir='E:/BA/Datensatz/test_generated', target_size=(240, 300),class_mode='categorical', batch_size=1, shuffle=False)
+    test_gen = test_datagen.flow_from_directory('E:/Datensatz/test',target_size=(240, 300),class_mode='categorical', batch_size=1, shuffle=False)
     predicted = model.predict_generator(test_gen)
-    y_pred = model.predict_generator(test_gen, 61)
+    y_pred = model.predict_generator(test_gen, 68)
     Y_pred = np.argmax(y_pred, axis=1)
     print('Confusion Matrix')
     print(confusion_matrix(test_gen.classes, Y_pred))
 
 #for evaluating or testing a Set
-evaluate_generator()
-create_confusion_matrix()
+#evaluate_generator()
+#create_confusion_matrix()
 def predict_img():
 
-    imageList = controller.images
-    image0 = imageList[0]
-    image1 = imageList[1]
+    images = controller.images
+    image0 = images[0]
+    image1 = images[1]
     image0_buffer_ptr = image0.data_pointer
     image1_buffer_ptr = image1.data_pointer
     ctype_array_def = ctypes.c_ubyte * image0.width * image1.height
@@ -80,8 +80,8 @@ def predict_img():
     #save as image to rescale and predict
     global i
     img_save = pil_image.fromarray(arrays)
-    img_save.save('E:/BA/Datensatz/testing/test.jpg','jpeg')
-    img = image.load_img('E:/BA/Datensatz/testing/test.jpg',target_size=(240,300), color_mode='rgb')
+    img_save.save('test.jpg','jpeg')
+    img = image.load_img('test.jpg',target_size=(240,300), color_mode='rgb')
     #Show image before predicting
     #plt.imshow(img)
     #plt.show()
@@ -89,17 +89,52 @@ def predict_img():
     x = np.expand_dims(x, axis=0)
     predicted = model.predict(x)
     class_pred = (predicted.argmax(axis=-1))
+    max_value = predicted.max()
+    print(max_value)
     #print(pred)
     print(class_pred)
-    return class_pred
+    interpret_label(class_pred)
+    return interpret_label(class_pred), max_value
 
-
+def interpret_label(label):
+    if label ==[0]:
+        print("button1")
+        return "button1"
+    if label ==[1]:
+        print("button2")
+        return "button2"
+    if label ==[2]:
+        print("button3")
+        return "button3"
+    if label ==[3]:
+        print("button4")
+        return "button4"
+    if label ==[4]:
+        print("fist")
+        return "fist"
+    if label ==[5]:
+        print("flach")
+        return"flach"
+    if label ==[6]:
+        print("gespreizt")
+        return "gespreizt"
+    if label ==[7]:
+        print("ok")
+        return"ok"
+    if label ==[8]:
+        print("peace")
+        return "peace"
+    if label ==[9]:
+        print("pencil")
+        return "pencil"
+    if label ==[10]:
+        print("pistol")
+        return "pistol"
 
 while False:
     if keyboard.is_pressed('p'):
         time.sleep(2)
-        while True:
-            predict_img()
+        predict_img()
 
 
 #Save Images yes or no?
@@ -113,12 +148,15 @@ class LeapListener(Leap.Listener):
         print("Connected")
 
     def on_images(self, controller):
-        imageList = controller.images
+        predict_img()
+        #imageList = controller.images
         #predict_img()
-        #image_gen(imageList)
-        global bool
-        if bool==True:
-            save_images(imageList)
+        #global bool
+        #if bool==True:
+        #    save_images(imageList)
+
+
+
 
 
 
@@ -209,8 +247,10 @@ def image_gen(imageList):
         pass
     finally:
 
-        controller.remove_listener(listener)"""
+        controller.remove_listener(listener)
 
+#if __name__ == "__main__":
+#    main()"""
 
 
 
@@ -233,16 +273,18 @@ def main():
     Root.title("Predict")
 
 
-    def predicting(m):
+    def predicting(m1):
         if predict:
             time.sleep(3)
-            prediction = predict_img()
-            m.config(text=prediction)
+            prediction, value = predict_img()
+            m1.config(text=prediction)
+            #m2.config(text=value)
             Root.update()
             while True:
                 time.sleep(1)
                 prediction = predict_img()
-                m.config(text=prediction)
+                m1.config(text=prediction)
+                #m2.config(text=value)
                 Root.update()
 
 
@@ -251,6 +293,8 @@ def main():
     label.place(x=70,y=100)
     MyLabel1 = ttk.Label(Root, text = 'The button has not been pressed.')
     MyLabel1.place(x=130,y=100)
+    #MyLabel2 = ttk.Label(Root, text='button not yet pressed')
+    #MyLabel2.place(x=130, y=130)
 
     #Erstellen der Legende
     #Beschriftung der Posen
@@ -306,10 +350,9 @@ def main():
     #Button zum Predicten
     MyButton1 = ttk.Button(Root, text = 'Start predicting', command = lambda: predicting(MyLabel1))
     #MyButton1.config(height=50,width=50)
-    MyButton2 = ttk.Button(Root, text = 'Stop predicting', command = lambda: stop())
-    MyButton2.place(x=200,y=50)
     MyButton1.place(x=100,y=50)
     Root.mainloop()
+
 if __name__ == "__main__":
     main()
 
