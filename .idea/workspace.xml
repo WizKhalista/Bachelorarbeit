@@ -29,6 +29,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Marcel\PycharmProjects\LeapPortable\Screens" />
       <recent name="C:\Users\Marcel\PycharmProjects\LeapPortable" />
     </key>
   </component>
@@ -84,5 +85,18 @@
       <updated>1580898448128</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
